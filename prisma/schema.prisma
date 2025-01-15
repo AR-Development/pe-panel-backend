@@ -1,0 +1,210 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  Id            Int         @id @default(autoincrement())
+  Username      String      @unique
+  Password      String
+  Administrator Boolean     @default(false)
+  CreatedAt     DateTime    @default(now())
+  DiscordId     String?     @db.VarChar(255)
+  panellogs     panellogs[]
+  role          panelroles? @relation(fields: [panelrolesId], references: [Id])
+  panelrolesId  Int
+}
+
+model castles {
+  Id           Int @id @default(autoincrement())
+  CastleIndex  Int @unique(map: "IX_Castles_CastleIndex")
+  FactionIndex Int @default(0)
+}
+
+model factions {
+  Id             Int     @id @default(autoincrement())
+  FactionIndex   Int     @unique(map: "IX_Factions_FactionIndex")
+  Name           String  @db.VarChar(255)
+  BannerKey      String  @db.VarChar(255)
+  LordId         String? @db.VarChar(255)
+  PollUnlockedAt BigInt? @default(0)
+  Marshalls      String? @db.Text
+}
+
+model horsemarkets {
+  Id                Int      @id @default(autoincrement())
+  MissionObjectHash String   @db.VarChar(255)
+  Stock             Int
+  UpdatedAt         DateTime @default(now()) @updatedAt
+}
+
+model inventories {
+  Id                  Int     @id @default(autoincrement())
+  PlayerId            String? @db.VarChar(255)
+  InventoryId         String  @db.VarChar(255)
+  IsPlayerInventory   Boolean
+  InventorySerialized String  @db.Text
+}
+
+model logs {
+  Id                Int      @id @default(autoincrement())
+  CreatedAt         DateTime @db.DateTime(0)
+  IssuerPlayerId    String   @db.VarChar(255)
+  IssuerPlayerName  String   @db.VarChar(255)
+  ActionType        String   @db.VarChar(255)
+  IssuerCoordinates String   @db.VarChar(255)
+  LogMessage        String   @db.Text
+  AffectedPlayers   Json?
+
+  @@index([CreatedAt])
+  @@index([ActionType])
+}
+
+model panellogs {
+  Id         Int      @id @default(autoincrement())
+  CreatedAt  DateTime @default(now())
+  LogMessage String   @db.VarChar(255)
+  ActionType String   @db.VarChar(255)
+  Username   String
+  usersId    Int?
+  users      users?   @relation(fields: [usersId], references: [Id])
+
+  @@index([usersId], map: "panellogs_usersId_fkey")
+}
+
+model playermodlogs {
+  Id             Int      @id @default(autoincrement())
+  CreatedAt      DateTime @default(now())
+  PlayerId       String   @db.VarChar(255)
+  PlayerName     String   @db.VarChar(255)
+  PunishmentType String
+  DurationMin    Int      @default(0)
+  Reason         String
+  BannedBy       String
+}
+
+model players {
+  Id           Int      @id @default(autoincrement())
+  PlayerId     String   @unique(map: "IX_Players_PlayerId") @db.VarChar(255)
+  Name         String   @db.VarChar(512)
+  Hunger       Int      @default(0)
+  Health       Int      @default(0)
+  Money        Int      @default(0)
+  BankAmount   Int      @default(0)
+  Horse        String?  @db.VarChar(255)
+  HorseHarness String?  @db.VarChar(255)
+  Equipment_0  String?  @db.VarChar(255)
+  Equipment_1  String?  @db.VarChar(255)
+  Equipment_2  String?  @db.VarChar(255)
+  Equipment_3  String?  @db.VarChar(255)
+  Armor_Head   String?  @db.VarChar(255)
+  Armor_Body   String?  @db.VarChar(255)
+  Armor_Leg    String?  @db.VarChar(255)
+  Armor_Gloves String?  @db.VarChar(255)
+  Armor_Cape   String?  @db.VarChar(255)
+  FactionIndex Int      @default(0)
+  Class        String   @default("pe_peasant") @db.VarChar(255)
+  PosX         Float    @default(0) @db.Float
+  PosY         Float    @default(0) @db.Float
+  PosZ         Float    @default(0) @db.Float
+  Ammo_0       Int      @default(0)
+  Ammo_1       Int      @default(0)
+  Ammo_2       Int      @default(0)
+  Ammo_3       Int      @default(0)
+  DiscordId    String?  @unique @db.VarChar(255)
+  CustomName   String?  @db.VarChar(255)
+  CreatedAt    DateTime @default(now())
+  UpdatedAt    DateTime @updatedAt
+}
+
+model banrecords {
+  Id          Int      @id @default(autoincrement())
+  PlayerId    String   @db.VarChar(255)
+  PlayerName  String   @db.VarChar(255)
+  BanReason   String?
+  BannedBy    String
+  UnbanReason String?
+  CreatedAt   DateTime @default(now())
+  BanEndsAt   DateTime
+}
+
+model stockpilemarkets {
+  Id                    Int      @id @default(autoincrement())
+  MissionObjectHash     String   @db.VarChar(255)
+  MarketItemsSerialized String   @db.Text
+  UpdatedAt             DateTime @default(now()) @updatedAt
+}
+
+model upgradeablebuildings {
+  Id                Int      @id @default(autoincrement())
+  MissionObjectHash String   @db.VarChar(255)
+  IsUpgrading       Boolean  @default(false)
+  CurrentTier       Int      @default(0)
+  UpdatedAt         DateTime @default(now()) @updatedAt
+}
+
+model versioninfo {
+  Version     BigInt    @unique(map: "UC_Version")
+  AppliedOn   DateTime? @db.DateTime(0)
+  Description String?   @db.VarChar(1024)
+}
+
+model steamdiscordpairs {
+  Id        Int    @id @default(autoincrement())
+  SteamId   String @unique
+  DiscordId String
+}
+
+model playernames {
+  Id         Int    @id @default(autoincrement())
+  PlayerName String @db.VarChar(255)
+  PlayerId   String @db.VarChar(255)
+}
+
+model discordconfig {
+  SettingName  String @id @db.VarChar(100)
+  SettingValue String @db.LongText
+  SettingType  Int    @db.TinyInt
+}
+
+model discordtickets {
+  TicketID   Int       @id @default(autoincrement())
+  ChannelId  String    @unique @db.VarChar(255)
+  MessageId  String    @db.VarChar(255)
+  IssuerId   String    @db.VarChar(255)
+  ClosedAt   DateTime?
+  ClosedById String?   @db.VarChar(255)
+  CreatedAt  DateTime  @default(now())
+  ClaimedBy  String?   @db.VarChar(255)
+  ParentId   String    @db.VarChar(255)
+}
+
+model panelconfigs {
+  ConfigName      String @id @db.VarChar(255)
+  ConfigValue     String @db.VarChar(255)
+  ConfigValueType Int    @db.TinyInt // 1 = string, 2 = string[]
+}
+
+model panelroles {
+  Id            Int     @id @default(autoincrement())
+  Name          String  @unique @db.VarChar(255)
+  PermissionBit Int     @default(0)
+  users         users[]
+}
+
+model whitelist {
+  PlayerId String  @id @db.VarChar(255)
+  Active   Boolean @default(true)
+}
+
+model identifiers {
+  Identifier     String   @id @db.VarChar(500)
+  IdentifierType String?  @db.VarChar(255)
+  UserId         Int?     @db.Int
+  CreatedAt      DateTime @default(now())
+  UpdatedAt      DateTime @updatedAt
+}

@@ -1,0 +1,20 @@
+version: '3'
+ 
+services:
+  db:
+    image: mariadb:10.3.16
+    container_name: db
+    command: 
+      --innodb-flush-method=fsync
+      --innodb-use-native-aio=0
+    environment:
+      MYSQL_ROOT_PASSWORD: mypass12
+      MYSQL_DATABASE: app_db
+      MYSQL_USER: alverrt
+      MYSQL_PASSWORD: alverrt112
+    ports:
+      - "6033:3306"
+    volumes:
+        - mysql:/var/lib/mysql
+volumes:
+  mysql:
