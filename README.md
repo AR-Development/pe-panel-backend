@@ -9,10 +9,11 @@ FEEL FREE TO CONTRIBUTE.
 - NodeJS v18+
 - npm
 - TypeScript
+- Redis
 
 ## Installation
 
-Fill the env config according to `.env.sample` and run `npm start`. 
+Fill the env config according to `.env.sample` and run `npx prisma generate` and `npm start`. 
 
 In production enviroment, PM2 setup is recommended.
 
